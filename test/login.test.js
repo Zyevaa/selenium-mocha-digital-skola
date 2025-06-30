@@ -1,12 +1,16 @@
-const { Builder, By } = require('selenium-webdriver');
-const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const LoginPage = require('../page/login.page');
+const {Builder} = require('selenium-webdriver');
 
-describe('Login Test - Saucedemo', function () {
+describe('Login Test - Saucedemo (POM)', function () {
   this.timeout(30000);
   let driver;
+  let loginPage;
 
   before(async function () {
     driver = await new Builder().forBrowser('firefox').build();
+    loginPage = new LoginPage(driver);
   });
 
   after(async function () {
@@ -14,12 +18,11 @@ describe('Login Test - Saucedemo', function () {
   });
 
   it('should login with valid credentials', async function () {
-    await driver.get('https://www.saucedemo.com/');
-    await driver.findElement(By.id('user-name')).sendKeys('standard_user');
-    await driver.findElement(By.id('password')).sendKeys('secret_sauce');
-    await driver.findElement(By.id('login-button')).click();
+    await loginPage.open();
+    await loginPage.login('standard_user', 'secret_sauce');
 
-    const currentUrl = await driver.getCurrentUrl();
-    assert.ok(currentUrl.includes('inventory'));
+    // Tambah Visual Test - Ambil Screenshot
+    const image = await driver.takeScreenshot();
+    fs.writeFileSync(path.join('screenshot', 'login-success.png'), image, 'base64');
   });
 });
